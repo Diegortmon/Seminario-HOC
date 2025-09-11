@@ -1,31 +1,26 @@
-# Definicion de las estructuras de datos 
+# estructuras.jl - Definiciones de tipos y estructuras
 
 # Estructura para representar una ciudad
 struct Ciudad
     id::Int
-    nombre::String
-    x::Float64
-    y::Float64
+    name::String
+    country::String
+    population::Int
+    lat::Float64  # latitud en grados
+    lon::Float64  # longitud en grados
 end
 
-
-# Estructura para representar una ruta entre dos ciudades
-struct Ruta
-    origen::Ciudad
-    destino::Ciudad
-    distancia::Float64
+# Estructura para el problema TSP
+struct TSP
+    ciudades::Vector{Ciudad}
+    grafica::Matrix{Bool}  # matriz de adyacencia
+    distancias::Matrix{Float64}  # matriz de distancias
+    max_distancia::Float64
+    normalizador::Float64
+    city_id_to_index::Dict{Int, Int}  # mapeo de ID de ciudad a índice
 end
 
-# FUncion para calcular la distancia de una ruta suponinedo que la tierra es una esfera perfecta
-function calcular_distancia(ruta::Ruta)
-    R = 6371.0  # Radio de la Tierra en kilómetros
-    dlat = deg2rad(ruta.destino.y - ruta.origen.y)
-    dlon = deg2rad(ruta.destino.x - ruta.origen.x)
-    a = sin(dlat / 2)^2 + cos(deg2rad(ruta.origen.y)) * cos(deg2rad(Ruta.destino.y)) * sin(dlon / 2)^2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    distancia = R * c
-    return distancia
+# Estructura para leer archivos .tsp
+struct TSPInput
+    path::Vector{Int}
 end
-
-
-
