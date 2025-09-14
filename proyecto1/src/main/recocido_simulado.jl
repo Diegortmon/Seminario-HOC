@@ -33,12 +33,12 @@ end
 
 # Algoritmo principal de Aceptación por Umbrales
 function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int}; 
-                                L::Int = 50,
-                                φ::Float64 = 0.95,
-                                ε::Float64 = 0.001,
+                                L::Int,
+                                φ::Float64,
+                                ε::Float64 ,
                                 T_inicial::Float64 = 8.0,
                                 P::Float64 = 0.9,
-                                max_iteraciones::Int = 1000)
+                                max_iteraciones::Int )
     
     # Calcular temperatura inicial
     T = temperatura_inicial(tsp, s, T_inicial, P)

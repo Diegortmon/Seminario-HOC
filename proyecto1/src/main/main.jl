@@ -27,10 +27,10 @@ function main(semilla::Int)
     mejor_solucion, _ = aceptacion_por_umbrales(
         tsp, 
         solucion_inicial,
-        L=50,
+        L=40000,
         φ=0.95,
         ε=0.001,
-        max_iteraciones=1000
+        max_iteraciones=10000000
     )
     
     # Convertir resultado a IDs
@@ -48,7 +48,7 @@ function main(semilla::Int)
     println("Normalizer: $(tsp.normalizador)")
     println("Evaluation: $costo_normalizado")
     println("Feasible: $factible")
-    println("Total Cost: $costo_total")
+    println("seed: $semilla")
 end
 
 # Ejecutar si se proporciona argumento
