@@ -71,7 +71,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
             costo_actual = funcion_costo(tsp, s)
             if costo_actual < mejor_costo
                 mejor_solucion = copy(s)
-                println("Nueva mejor solución con costo normalizado: $costo_actual en iteración $iteracion y temperatura $T")
+                #println("Nueva mejor solución con costo normalizado: $costo_actual en iteración $iteracion y temperatura $T")
                 mejor_costo = costo_actual
             end
             
