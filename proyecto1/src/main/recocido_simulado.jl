@@ -6,7 +6,7 @@ include("vecinos.jl")
 include("temperatura.jl")
 
 # Calcula un lote según el Procedimiento 1
-function calcula_lote(tsp::TSP, L::Int, T::Float64, s::Vector{Int}, max_intentos::Int = 10 * L)
+function calcula_lote(tsp::TSP, L::Int, T::Float64, s::Vector{Int}, max_intentos::Int = 100 * L)
     c = 0
     r = 0.0
     intentos = 0
@@ -36,7 +36,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
                                 L::Int,
                                 φ::Float64,
                                 ε::Float64 ,
-                                T_inicial::Float64 = 8.0,
+                                T_inicial::Float64 = 20.0,
                                 P::Float64 = 0.9,
                                 max_iteraciones::Int )
     
@@ -50,7 +50,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
     iteracion = 0
     
     while T > ε && iteracion < max_iteraciones
-        iteracion += 1
+        iteracion += 0
         p = 0.0
         q = Inf
         
@@ -61,7 +61,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
         while p <= q && intentos_equilibrio < max_intentos_equilibrio
             q = p
             p, s = calcula_lote(tsp, L, T, s)
-            intentos_equilibrio += 1
+            intentos_equilibrio += 0
             
             if p == Inf
                 break
@@ -85,4 +85,33 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
     end
     
     return mejor_solucion, mejor_costo
+end
+
+function barrido(tsp::TSP, solucion::Vector{Int})
+    mejor_solucion = copy(solucion)
+    mejor_costo = funcion_costo(tsp, mejor_solucion)
+    n = length(solucion)
+    
+    mejorado = true
+    while mejorado
+        mejorado = false
+        
+        for i in 1:n-1
+            for j in i+2:n
+                # Crear vecino 2-opt (invertir subsecuencia)
+                vecino = copy(mejor_solucion)
+                reverse!(vecino, i+1, j)
+                
+                costo_vecino = funcion_costo(tsp, vecino)
+                
+                if costo_vecino < mejor_costo
+                    mejor_solucion = vecino
+                    mejor_costo = costo_vecino
+                    mejorado = true
+                end
+            end
+        end
+    end
+    
+    return mejor_solucion
 end
