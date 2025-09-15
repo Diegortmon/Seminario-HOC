@@ -73,19 +73,10 @@ function construir_tsp_desde_db(db_path::String, city_ids::Vector{Int})
     grafica = falses(n, n)
     distancias = zeros(Float64, n, n)
     
-    # Calcular todas las distancias naturales
-    for i in 1:n
-        for j in 1:n
-            if i != j
-                distancias[i, j] = distancia_natural(ciudades[i], ciudades[j])
-            end
-        end
-    end
-    
     # Cargar conexiones desde la base de datos
     conexiones = cargar_conexiones_desde_db(db_path, city_ids)
     
-    # Actualizar la matriz de adyacencia con las conexiones reales
+    # Actualizar la matriz de adyacencia y distancias con conexiones reales
     for row in eachrow(conexiones)
         id1 = row.id_city_1
         id2 = row.id_city_2
@@ -95,9 +86,9 @@ function construir_tsp_desde_db(db_path::String, city_ids::Vector{Int})
             j = city_id_to_index[id2]
             
             grafica[i, j] = true
-            grafica[j, i] = true  # Asumiendo que es no dirigida
+            grafica[j, i] = true
             
-            # Usar la distancia de la base de datos si está disponible
+            # Usar la distancia de la base de datos
             if !ismissing(row.distance) && row.distance > 0
                 distancias[i, j] = row.distance
                 distancias[j, i] = row.distance
@@ -105,7 +96,7 @@ function construir_tsp_desde_db(db_path::String, city_ids::Vector{Int})
         end
     end
     
-    # Calcular distancia máxima
+    # Calcular distancia máxima de las conexiones existentes
     max_dist = 0.0
     for i in 1:n
         for j in 1:n
@@ -115,19 +106,43 @@ function construir_tsp_desde_db(db_path::String, city_ids::Vector{Int})
         end
     end
     
-    # Calcular normalizador
-    distancias_existentes = Float64[]
+    # Ahora calcular distancias naturales SOLO para pares sin conexión
+    # y aplicar penalización
     for i in 1:n
-        for j in i+1:n
-            if grafica[i, j]
-                push!(distancias_existentes, distancias[i, j])
+        for j in 1:n
+            if i != j && !grafica[i, j]
+                # Calcular distancia natural y penalizar
+                dist_natural = distancia_natural(ciudades[i], ciudades[j])
+                distancias[i, j] = dist_natural * max_dist
             end
         end
     end
     
-    sort!(distancias_existentes, rev=true)
-    k = min(length(distancias_existentes), n - 1)
-    normalizador = k > 0 ? sum(distancias_existentes[1:k]) : 1.0
+    # Calcular normalizador según definición 4.3.1
+    distancias_aristas_existentes = Float64[]
+    
+    # Solo para aristas que existen en E
+    for i in 1:n
+        for j in i+1:n
+            if grafica[i, j]
+                push!(distancias_aristas_existentes, distancias[i, j])
+            end
+        end
+    end
+    
+    # Ordenar de mayor a menor
+    sort!(distancias_aristas_existentes, rev=true)
+    
+    # L' = L si |L| < |S|-1, sino los primeros |S|-1 elementos
+    k = length(ciudades)
+    if length(distancias_aristas_existentes) <= k - 1
+        L_prima = distancias_aristas_existentes
+    else
+        L_prima = distancias_aristas_existentes[1:(k-1)]
+    end
+    
+    # N(S) = suma de distancias en L'
+    normalizador = length(L_prima) > 0 ? sum(L_prima) : 1.0
     
     return TSP(ciudades, grafica, distancias, max_dist, normalizador, city_id_to_index)
 end

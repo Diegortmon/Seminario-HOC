@@ -9,8 +9,8 @@ include("recocido_simulado.jl")
 include("database_reader.jl")
 
 # Función principal
-# Función principal
 function main(semilla::Int)
+    println("Usando semilla: $semilla")
     Random.seed!(semilla)
     
     # Buscar y leer archivo .tsp
@@ -51,8 +51,38 @@ function main(semilla::Int)
     println("seed: $semilla")
 end
 
+function gestor(semillaInicio::String, semillaFin::String)
+    inicio = parse(Int, semillaInicio)
+    fin = parse(Int, semillaFin)
+    
+    for semilla in inicio:fin
+        main(semilla)
+    end
+end
+
+function gestor(semillas::Vector{String})
+    for semilla in semillas
+        main(parse(Int, semilla))
+    end
+end
+
+function printUso()
+    println("EL programa se debe ejecutar de la siguiente manera:")
+    println("Una semilla: Julia main.jl <semilla>")
+    println("Semillas seguidas: Julia main.jl <semillaInicio> - <semillaFin>")
+    println("Lista de semillas: Julia main.jl <semilla1> <semilla2> ... <semillan>")
+
+end
+
 # Ejecutar si se proporciona argumento
-if length(ARGS) > 0
+if length(ARGS) == 1
     semilla = parse(Int, ARGS[1])
     main(semilla)
+elseif length(ARGS) == 3 && ARGS[2] == "-"
+    
+    gestor(ARGS[1], ARGS[3])
+elseif length(ARGS) > 0
+    gestor(ARGS)
+else
+    printUso()
 end
