@@ -150,4 +150,5 @@ end
 # Busca el archivo .tsp en el directorio actual
 function encontrar_archivo_tsp()
     "src/inputs/input-150.tsp"
+    # "src/inputs/input-40.tsp"
 end
