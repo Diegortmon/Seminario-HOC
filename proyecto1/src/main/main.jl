@@ -1,13 +1,17 @@
-#main.jl - Punto de entrada principal del programa
+# src/main/main.jl - Punto de entrada principal del programa
 using Random
 using SQLite
 using DataFrames
 using StatsBase
 using Base.Threads
 
+# Incluir archivos locales
 include("estructuras.jl")
 include("recocido_simulado.jl")
 include("database_reader.jl")
+include("utilidades.jl")
+include("vecinos.jl")
+include("temperatura.jl")
 
 const output_lock = ReentrantLock()
 
@@ -17,14 +21,13 @@ function main()
         return
     end
 
-    if !isdir("soluciones")
-        mkdir("soluciones")
-    end
+    # Crear directorio de salida en la raíz del proyecto
+    mkpath("../../results/soluciones")
     
     println("Cargando instancia TSP...")
     archivo_tsp = encontrar_archivo_tsp()
     tsp_input = leer_archivo_tsp(archivo_tsp)
-    tsp = construir_tsp_desde_db("../bd/tsp.db", tsp_input.path)
+    tsp = construir_tsp_desde_db("src/bd/tsp.db", tsp_input.path)
     solucion_base = ids_a_permutacion(tsp, tsp_input.path)
     
     println("Instancia cargada: $(length(tsp.ciudades)) ciudades")
@@ -72,10 +75,10 @@ function ejecutar_semilla(semilla::Int, tsp::TSP, solucion_base::Vector{Int}, ar
     mejor_solucion, _ = aceptacion_por_umbrales(
         tsp, 
         solucion_inicial,
-        L=40000,
+        L=4000,
         φ=0.9,
-        ε=0.0001,
-        max_iteraciones=10000000
+        ε=0.001,
+        max_iteraciones=1000000
     )
     mejor_solucion = barrido(tsp, mejor_solucion)
     
@@ -84,7 +87,7 @@ function ejecutar_semilla(semilla::Int, tsp::TSP, solucion_base::Vector{Int}, ar
     factible = es_factible(tsp, mejor_solucion) ? "YES" : "NO"
     
     # Escribir a archivo específico de la semilla
-    nombre_archivo = "soluciones/salida_$semilla.tsp"
+    nombre_archivo = "results/soluciones/salida_$semilla.tsp"
     open(nombre_archivo, "w") do f
         println(f, "Filename: $archivo_tsp")
         println(f, "Path: $(join(mejor_path_ids, ","))")
@@ -110,7 +113,6 @@ function mostrar_resumen(resultados)
         println()
         println("=" ^ 60)
         println("RESUMEN DE EJECUCIÓN PARALELA")
-        #println("=" * 60)
         
         mejor_idx = argmin([r[2] for r in resultados])
         mejor = resultados[mejor_idx]
@@ -147,13 +149,14 @@ end
 
 function printUso()
     println("Uso del programa:")
-    println("  julia --threads=auto main.jl <semilla>")
-    println("  julia --threads=auto main.jl <inicio> - <fin>")
-    println("  julia --threads=auto main.jl <semilla1> <semilla2> ... <semillan>")
+    println("  julia run.jl <semilla>")
+    println("  julia --threads=auto run.jl <inicio> - <fin>")
+    println("  julia --threads=auto run.jl <semilla1> <semilla2> ... <semillan>")
     println()
     println("Hilos disponibles: $(nthreads())")
 end
 
+# Ejecutar siempre que tenga argumentos, sin importar cómo se llame
 if length(ARGS) > 0
     try
         main()

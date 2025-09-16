@@ -36,7 +36,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
                                 L::Int,
                                 φ::Float64,
                                 ε::Float64 ,
-                                T_inicial::Float64 = 20.0,
+                                T_inicial::Float64 = 8.0,
                                 P::Float64 = 0.9,
                                 max_iteraciones::Int )
     

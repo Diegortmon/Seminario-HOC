@@ -5,7 +5,7 @@ include("utilidades.jl")
 include("vecinos.jl")
 
 # Calcula el porcentaje de soluciones aceptadas
-function porcentaje_aceptados(tsp::TSP, s::Vector{Int}, T::Float64, N::Int = 1000)
+function porcentaje_aceptados(tsp::TSP, s::Vector{Int}, T::Float64, N::Int = 100)
     c = 0
     s_actual = copy(s)
     
