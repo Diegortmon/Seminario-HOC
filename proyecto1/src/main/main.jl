@@ -22,7 +22,7 @@ function main()
     end
 
     # Crear directorio de salida en la raíz del proyecto
-    mkpath("../../results/soluciones")
+    mkpath("results/soluciones")
     
     println("Cargando instancia TSP...")
     archivo_tsp = encontrar_archivo_tsp()
@@ -47,17 +47,7 @@ function ejecutar_semillas(semillas::Vector{Int}, tsp::TSP, solucion_base::Vecto
         @sync begin
             for i in 1:length(semillas)
                 @spawn begin
-                    try
-                        resultados[i] = ejecutar_semilla(semillas[i], tsp, solucion_base, archivo_tsp)
-                    catch e
-                        println("ERROR en semilla $(semillas[i]): $e")
-                        println("Stacktrace:")
-                        for (exc, bt) in Base.catch_stack()
-                            showerror(stdout, exc, bt)
-                            println()
-                        end
-                        rethrow(e)
-                    end
+                    resultados[i] = ejecutar_semilla(semillas[i], tsp, copy(solucion_base), archivo_tsp)
                 end
             end
         end
@@ -75,10 +65,10 @@ function ejecutar_semilla(semilla::Int, tsp::TSP, solucion_base::Vector{Int}, ar
     mejor_solucion, _ = aceptacion_por_umbrales(
         tsp, 
         solucion_inicial,
-        L=4000,
+        L=8000,
         φ=0.9,
         ε=0.001,
-        max_iteraciones=1000000
+        max_iteraciones=100000
     )
     mejor_solucion = barrido(tsp, mejor_solucion)
     

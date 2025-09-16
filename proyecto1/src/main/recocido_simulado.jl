@@ -50,7 +50,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
     iteracion = 0
     
     while T > ε && iteracion < max_iteraciones
-        iteracion += 0
+        iteracion += 1
         p = 0.0
         q = Inf
         
@@ -61,7 +61,7 @@ function aceptacion_por_umbrales(tsp::TSP, s::Vector{Int};
         while p <= q && intentos_equilibrio < max_intentos_equilibrio
             q = p
             p, s = calcula_lote(tsp, L, T, s)
-            intentos_equilibrio += 0
+            intentos_equilibrio += 1
             
             if p == Inf
                 break
